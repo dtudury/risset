@@ -47,7 +47,7 @@ function createShader (type, source) {
 
 const program = createProgram(
   createShader(gl.VERTEX_SHADER, `
-    #define WAVES 13.0
+    #define WAVES 10.0
     #define PI2 ${2 * Math.PI}
     precision lowp float;
     uniform vec2 resolution;
@@ -61,10 +61,10 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       for (float i = 0.0; i < WAVES; i++) {
-        float j = mod(-time * 4.0 + i, WAVES);
+        float j = mod(time * 4.0 + i, WAVES);
 
-        float f = 0.12 * pow(0.85, j);
-        float angle = mod(i + time / 2.0, PI2);
+        float f = 0.2 * pow(0.85, j);
+        float angle = mod(i + time / 3.0, PI2);
         float v = 2.4 * pow(0.97, i);
         float amp = 0.9 * pow(0.97, i);
 
