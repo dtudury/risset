@@ -47,6 +47,8 @@ function createShader (type, source) {
 
 const program = createProgram(
   createShader(gl.VERTEX_SHADER, `
+    #define WAVES 13.0
+    #define PI2 ${2 * Math.PI}
     precision lowp float;
     uniform vec2 resolution;
     uniform float time;
@@ -58,28 +60,22 @@ const program = createProgram(
       float r = 0.0;
       float g = 0.0;
       float b = 0.0;
-      // 13 waves
-      for (float i = 0.0; i < 13.0; i++) {
-        float t = time; // + i;
-        float j = mod(time + i, 13.0);
-        float a = mod(time, 1.0);
-        float k = -floor(time) + i;
+      for (float i = 0.0; i < WAVES; i++) {
+        float j = mod(-time * 4.0 + i, WAVES);
 
         float f = 0.12 * pow(0.85, j);
-        float angle = mod(0.9 * t - j, ${2 * Math.PI});
-        float v = 2.4 * pow(0.97, j);
-        float amp = 0.9 * pow(0.97, j);
+        float angle = mod(i + time / 2.0, PI2);
+        float v = 2.4 * pow(0.97, i);
+        float amp = 0.9 * pow(0.97, i);
 
-        if (j < 6.0) {
-          amp *= j / 6.0;
-        } else if (j > 7.0) {
-          amp *= (13.0 - j) / 6.0;
-        }
+        amp *= 0.5 - cos(PI2 * j / WAVES) * 0.5;
 
-        r += amp * sin((t + 0.4) * v + f * (sin(angle) * x + cos(angle) * y));
-        g += amp * sin((t + 0.8) * v + f * (sin(angle) * x + cos(angle) * y));
-        b += amp * sin((t + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
+        r += amp * sin((time + 0.4) * v + f * (sin(angle) * x + cos(angle) * y));
+        g += amp * sin((time + 0.8) * v + f * (sin(angle) * x + cos(angle) * y));
+        b += amp * sin((time + 0.0) * v + f * (sin(angle) * x + cos(angle) * y));
       }
+
+      // map colors
       r = sin(r) * 0.5 + 0.5;
       g = sin(g) * 0.5 + 0.5;
       b = sin(b) * 0.5 + 0.5;
