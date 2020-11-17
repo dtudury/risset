@@ -61,19 +61,19 @@ const program = createProgram(
       // 13 waves
       for (float i = 0.0; i < 13.0; i++) {
         float t = time; // + i;
+        float j = mod(time + i, 13.0);
         float a = mod(time, 1.0);
-        float j = a + i;
         float k = -floor(time) + i;
 
-        float f = 0.02 * pow(1.05, j);
-        float angle = mod(k, ${2 * Math.PI});
+        float f = 0.12 * pow(0.85, j);
+        float angle = mod(0.9 * t - j, ${2 * Math.PI});
         float v = 2.4 * pow(0.97, j);
         float amp = 0.9 * pow(0.97, j);
 
-        if (i == 0.0) {
-          amp *= a;
-        } else if (i == 12.0) {
-          amp *= 1.0 - a;
+        if (j < 6.0) {
+          amp *= j / 6.0;
+        } else if (j > 7.0) {
+          amp *= (13.0 - j) / 6.0;
         }
 
         r += amp * sin((t + 0.4) * v + f * (sin(angle) * x + cos(angle) * y));
