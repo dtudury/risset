@@ -45,10 +45,10 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       for (float i = 0.0; i < WAVES; i++) {
-        float j = mod(-time * 4.0 + i, WAVES);
+        float j = mod(-time * 2.0 + i, WAVES);
 
         float f = 0.2 * pow(0.85, j);
-        float angle = mod(i + time / 3.0, PI2);
+        float angle = mod(i + time * 0.0, PI2);
         float v = 2.4 * pow(0.97, i);
         float amp = 0.9 * pow(0.97, i);
 
@@ -144,19 +144,30 @@ canvas.onclick = e => {
 
   const bufferSize = 4096
   const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-  console.log(audioContext.sampleRate)
-  const brownNoise = (function () {
+  const music = (function () {
     let count = 0
+    const generatorCount = 20
+    const dt = 1 / audioContext.sampleRate
+    const positions = new Array(generatorCount)
+    positions.fill(0)
     const node = audioContext.createScriptProcessor(bufferSize, 1, 1)
     node.onaudioprocess = function (e) {
       const output = e.outputBuffer.getChannelData(0)
       for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.sin(440 * Math.PI * 2 * (bufferSize * count + i) / audioContext.sampleRate)
+        const t = (bufferSize * count + i) / audioContext.sampleRate
+        output[i] = 0
+        for (let j = 0; j < generatorCount; j++) {
+          const ji = (((j - t / 2.7) % generatorCount) + generatorCount) % generatorCount
+          const frequency = 220 * Math.pow(2, (ji - generatorCount / 2) / 2.7)
+          positions[j] = (positions[j] + (dt * frequency)) % 1
+          const envelope = 0.5 - Math.cos(Math.PI * 2 * ji / generatorCount) * 0.5
+          output[i] += Math.sin(positions[j] * 2 * Math.PI) * envelope * 0.1// Math.pow(2, (ji - 5) / 2)) * envelope
+        }
       }
       ++count
     }
     return node
   })()
 
-  brownNoise.connect(audioContext.destination)
+  music.connect(audioContext.destination)
 }
