@@ -1,20 +1,4 @@
 
-const model = {}
-
-function setFromHash () {
-  if (document.location.hash) {
-    try {
-      const hash = JSON.parse(unescape(document.location.hash.substring(1)))
-      Object.assign(model, hash)
-    } catch (err) {
-      console.error(err)
-    }
-  }
-}
-setFromHash()
-
-window.addEventListener('hashchange', setFromHash)
-
 const canvas = document.querySelector('canvas')
 const gl = canvas.getContext('webgl')
 if (!gl) {
@@ -26,7 +10,7 @@ function createProgram (vertexShader, fragmentShader) {
   gl.attachShader(program, vertexShader)
   gl.attachShader(program, fragmentShader)
   gl.linkProgram(program)
-  var success = gl.getProgramParameter(program, gl.LINK_STATUS)
+  const success = gl.getProgramParameter(program, gl.LINK_STATUS)
   if (success) {
     return program
   }
@@ -47,7 +31,7 @@ function createShader (type, source) {
 
 const program = createProgram(
   createShader(gl.VERTEX_SHADER, `
-    #define WAVES 10.0
+    #define WAVES 13.0
     #define PI2 ${2 * Math.PI}
     precision lowp float;
     uniform vec2 resolution;
@@ -61,7 +45,7 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       for (float i = 0.0; i < WAVES; i++) {
-        float j = mod(time * 4.0 + i, WAVES);
+        float j = mod(-time * 4.0 + i, WAVES);
 
         float f = 0.2 * pow(0.85, j);
         float angle = mod(i + time / 3.0, PI2);
@@ -152,3 +136,27 @@ function redraw (t) {
   window.requestAnimationFrame(redraw)
 }
 redraw(0)
+
+let started = false
+canvas.onclick = e => {
+  if (started) return
+  started = true
+
+  const bufferSize = 4096
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+  console.log(audioContext.sampleRate)
+  const brownNoise = (function () {
+    let count = 0
+    const node = audioContext.createScriptProcessor(bufferSize, 1, 1)
+    node.onaudioprocess = function (e) {
+      const output = e.outputBuffer.getChannelData(0)
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.sin(440 * Math.PI * 2 * (bufferSize * count + i) / audioContext.sampleRate)
+      }
+      ++count
+    }
+    return node
+  })()
+
+  brownNoise.connect(audioContext.destination)
+}

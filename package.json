@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/dtudury/risset#readme",
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "standard": "^16.0.2"
   }
 }
