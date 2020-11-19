@@ -7,19 +7,12 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js 1938"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dtudury/risset.git"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/dtudury/risset/issues"
-  },
-  "homepage": "https://github.com/dtudury/risset#readme",
   "devDependencies": {
     "express": "^4.17.1",
     "standard": "^16.0.2"
