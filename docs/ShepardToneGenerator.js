@@ -4,9 +4,9 @@
 class ShepardToneGenerator extends AudioWorkletProcessor {
   constructor () {
     super()
-    this.dt = 1 / sampleRate
-    this.generatorCount = 20
-    this.positions = new Array(this.generatorCount)
+    this.loopLength = 32
+    this.generatorCount = 19
+    this.positions = new Array(Math.floor(this.generatorCount))
     for (let i = 0; i < this.generatorCount; ++i) {
       this.positions[i] = Math.random()
     }
@@ -21,14 +21,14 @@ class ShepardToneGenerator extends AudioWorkletProcessor {
       outputChannelLength = Math.max(outputChannelLength, outputChannel.length)
       for (let i = 0; i < outputChannel.length; ++i) {
         const t = (this.count + i) / sampleRate
-        outputChannel[i] = 0
+        let sum = 0
         for (let j = 0; j < this.generatorCount; j++) {
-          const ji = (((j + t / 2.7) % this.generatorCount) + this.generatorCount) % this.generatorCount
-          const frequency = 220 * Math.pow(2, (ji - this.generatorCount / 2) / 2.7)
-          this.positions[j] = (this.positions[j] + (this.dt * frequency)) % 1
-          const envelope = 0.5 - Math.cos(Math.PI * 2 * ji / this.generatorCount) * 0.5
-          outputChannel[i] += Math.sin(this.positions[j] * 2 * Math.PI) * envelope * 0.1
+          const p = (t / this.loopLength + j / this.generatorCount) % 1
+          const position = (440 * 8 * Math.pow(16, p * 2 - 1)) % 1
+          const envelope = 0.5 - Math.cos(Math.PI * 2 * p) * 0.5
+          sum += Math.sin(position * 2 * Math.PI) * envelope / this.generatorCount
         }
+        outputChannel[i] = sum
       }
     }
     this.count += outputChannelLength
