@@ -1,3 +1,4 @@
+/* eslint-env browser */
 
 const canvas = document.querySelector('canvas')
 const gl = canvas.getContext('webgl')
@@ -45,7 +46,7 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       for (float i = 0.0; i < WAVES; i++) {
-        float j = mod(-time * 2.0 + i, WAVES);
+        float j = mod(time * 5.0 + i, WAVES);
 
         float f = 0.2 * pow(0.85, j);
         float angle = mod(i + time * 0.0, PI2);
@@ -63,12 +64,21 @@ const program = createProgram(
       r = sin(r) * 0.5 + 0.5;
       g = sin(g) * 0.5 + 0.5;
       b = sin(b) * 0.5 + 0.5;
-      fragColor = vec4(
-        10.0 + -15.0 * r + -5.0 * g + -5.0 * b,
-        4.0 + 0.0 * r + -5.0 * g + 0.0 * b,
-        9.0 + -5.0 * r + 0.0 * g + -5.0 * b,
-        1.0
-      );
+      float o2 = 9.0 + -5.0 * r + 0.0 * g + -5.0 * b;
+      float o0 = 10.0 + -15.0 * r + -5.0 * g + -5.0 * b;
+      float o1 = 4.0 + 0.0 * r + -5.0 * g + 0.0 * b;
+      /*
+      if (mod(time / 8.0, 2.0) < 1.0) {
+        o0 = 1.0 - o0;
+      }
+      if (mod(time / 8.0, 4.0) < 2.0) {
+        o1 = 1.0 - o1;
+      }
+      if (mod(time / 8.0, 8.0) < 4.0) {
+        o2 = 1.0 - o2;
+      }
+      */
+      fragColor = vec4( o0, o1, o2, 1.0);
       gl_Position = vec4(
         2.0 * vertPosition.x / resolution.x - 1.0,
         -2.0 * vertPosition.y / resolution.y + 1.0,
@@ -98,8 +108,8 @@ const timeLocation = gl.getUniformLocation(program, 'time')
 const resolutionLocation = gl.getUniformLocation(program, 'resolution')
 
 function resizeCanvas () {
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
+  canvas.width = innerWidth
+  canvas.height = innerHeight
   const xStep = 5 // step size
   const yStep = xStep * Math.sqrt(3) / 2
   vertices = []
@@ -122,52 +132,37 @@ function resizeCanvas () {
     }
   }
   vertices = vertices.flat()
-  gl.viewport(0, 0, window.innerWidth, window.innerHeight)
+  gl.viewport(0, 0, innerWidth, innerHeight)
   gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 }
-window.addEventListener('resize', resizeCanvas, false)
+addEventListener('resize', resizeCanvas, false)
 resizeCanvas()
 
 function redraw (t) {
   const time = (t / 1000) % 0x10000
   gl.uniform1f(timeLocation, time)
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
-  window.requestAnimationFrame(redraw)
+  requestAnimationFrame(redraw)
 }
 redraw(0)
 
-let started = false
-canvas.onclick = e => {
-  if (started) return
-  started = true
-
-  const bufferSize = 4096
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-  const music = (function () {
-    let count = 0
-    const generatorCount = 20
-    const dt = 1 / audioContext.sampleRate
-    const positions = new Array(generatorCount)
-    positions.fill(0)
-    const node = audioContext.createScriptProcessor(bufferSize, 1, 1)
-    node.onaudioprocess = function (e) {
-      const output = e.outputBuffer.getChannelData(0)
-      for (let i = 0; i < bufferSize; i++) {
-        const t = (bufferSize * count + i) / audioContext.sampleRate
-        output[i] = 0
-        for (let j = 0; j < generatorCount; j++) {
-          const ji = (((j - t / 2.7) % generatorCount) + generatorCount) % generatorCount
-          const frequency = 220 * Math.pow(2, (ji - generatorCount / 2) / 2.7)
-          positions[j] = (positions[j] + (dt * frequency)) % 1
-          const envelope = 0.5 - Math.cos(Math.PI * 2 * ji / generatorCount) * 0.5
-          output[i] += Math.sin(positions[j] * 2 * Math.PI) * envelope * 0.1// Math.pow(2, (ji - 5) / 2)) * envelope
-        }
-      }
-      ++count
+let audioContext = null
+async function startAudio () {
+  if (!audioContext) {
+    try {
+      audioContext = new AudioContext()
+      await audioContext.resume()
+      await audioContext.audioWorklet.addModule('ShepardToneGenerator.js')
+      const shepardToneGenerator = new AudioWorkletNode(audioContext, 'shepard-tone-generator')
+      shepardToneGenerator.connect(audioContext.destination)
+      await audioContext.audioWorklet.addModule('RissetRhythmGenerator.js')
+      const rissetRhythmGenerator = new AudioWorkletNode(audioContext, 'risset-rhythm-generator')
+      rissetRhythmGenerator.connect(audioContext.destination)
+    } catch (e) {
+      return null
     }
-    return node
-  })()
-
-  music.connect(audioContext.destination)
+  }
 }
+
+canvas.onclick = startAudio
