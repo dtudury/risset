@@ -5,7 +5,7 @@ class RissetRhythmGenerator extends AudioWorkletProcessor {
   constructor () {
     super()
     this.loopLength = 32
-    this.generatorCount = 8
+    this.generatorCount = 2
     this.positions = new Array(Math.floor(this.generatorCount))
     for (let i = 0; i < this.generatorCount; ++i) {
       this.positions[i] = Math.random()
@@ -24,7 +24,7 @@ class RissetRhythmGenerator extends AudioWorkletProcessor {
         let sum = 0
         for (let j = 0; j < this.generatorCount; j++) {
           const p = (t / this.loopLength + j / this.generatorCount) % 1
-          const position = (8 * Math.pow(2, this.generatorCount * (p - 0.5))) % 1
+          const position = (8 * Math.pow(2, 8 * (p - 0.5))) % 1
           const pressure = position < 0.1 ? (0.1 - position) / 0.1 * Math.random() : 0
           const envelope = 0.5 - Math.cos(Math.PI * 2 * p) * 0.5
           sum += pressure * envelope
