@@ -27,7 +27,7 @@ class ShepardToneGenerator extends AudioWorkletProcessor {
           const position = (440 * 4 * Math.pow(2, this.generatorCount * (p - 0.5))) % 1
           const pressure = Math.sin(position * 2 * Math.PI * 2)
           const envelope = 0.5 - Math.cos(Math.PI * 2 * p) * 0.5
-          sum += 0.7 * pressure * envelope / this.generatorCount
+          sum += 0.4 * pressure * envelope / this.generatorCount
         }
         outputChannel[i] = sum
       }
