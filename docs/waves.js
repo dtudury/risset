@@ -65,9 +65,9 @@ const program = createProgram(
       g = sin(g) * 0.5 + 0.5;
       b = sin(b) * 0.5 + 0.5;
       fragColor = vec4( 
-        1.0 - (10.0 + -15.0 * r + -5.0 * g + -5.0 * b),
-        1.0 - (4.0 + 0.0 * r + -5.0 * g + 0.0 * b),
-        1.0 - (9.0 + -5.0 * r + 0.0 * g + -5.0 * b),
+        0.0 + (10.0 + -15.0 * r + -5.0 * g + -5.0 * b),
+        0.0 + (4.0 + 0.0 * r + -5.0 * g + 0.0 * b),
+        0.0 + (9.0 + -5.0 * r + 0.0 * g + -5.0 * b),
         1.0);
       gl_Position = vec4(
         2.0 * vertPosition.x / resolution.x - 1.0,
