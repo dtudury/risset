@@ -46,10 +46,10 @@ const program = createProgram(
       float g = 0.0;
       float b = 0.0;
       for (float i = 0.0; i < WAVES; i++) {
-        float j = mod(time * 5.0 + i, WAVES);
+        float j = mod(time * 8.0 + i, WAVES);
 
         float f = 0.2 * pow(0.85, j);
-        float angle = mod(i + time * 0.0, PI2);
+        float angle = mod(i - time * 0.3, PI2);
         float v = 2.4 * pow(0.97, i);
         float amp = 0.9 * pow(0.97, i);
 
@@ -64,21 +64,11 @@ const program = createProgram(
       r = sin(r) * 0.5 + 0.5;
       g = sin(g) * 0.5 + 0.5;
       b = sin(b) * 0.5 + 0.5;
-      float o2 = 9.0 + -5.0 * r + 0.0 * g + -5.0 * b;
-      float o0 = 10.0 + -15.0 * r + -5.0 * g + -5.0 * b;
-      float o1 = 4.0 + 0.0 * r + -5.0 * g + 0.0 * b;
-      /*
-      if (mod(time / 8.0, 2.0) < 1.0) {
-        o0 = 1.0 - o0;
-      }
-      if (mod(time / 8.0, 4.0) < 2.0) {
-        o1 = 1.0 - o1;
-      }
-      if (mod(time / 8.0, 8.0) < 4.0) {
-        o2 = 1.0 - o2;
-      }
-      */
-      fragColor = vec4( o0, o1, o2, 1.0);
+      fragColor = vec4( 
+        10.0 + -15.0 * r + -5.0 * g + -5.0 * b,
+        4.0 + 0.0 * r + -5.0 * g + 0.0 * b,
+        9.0 + -5.0 * r + 0.0 * g + -5.0 * b,
+        1.0);
       gl_Position = vec4(
         2.0 * vertPosition.x / resolution.x - 1.0,
         -2.0 * vertPosition.y / resolution.y + 1.0,
